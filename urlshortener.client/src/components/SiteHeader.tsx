@@ -1,25 +1,24 @@
 import { Layout, Menu, Dropdown, Avatar, type MenuProps } from 'antd';
 import { UserOutlined, LogoutOutlined, LoginOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-// import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 const { Header } = Layout;
 
 const SiteHeader = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    // const { isAuthenticated, logout } = useAuth();
+    const { isAuthenticated, logout } = useAuth();
 
     const menuItems = [
-        { key: '/', label: 'Home' },
-        { key: '/shortUrls', label: 'Short URLs' },
+        { key: '/', label: 'Short URLs' },
         { key: '/about', label: 'About' },
     ];
 
     const activeKey = menuItems.find(item => item.key === location.pathname)?.key;
 
     const userMenuItems: MenuProps["items"] = [
-        /*...(isAuthenticated
+        ...(isAuthenticated
             ? [
                   {
                       key: "logout",
@@ -27,18 +26,18 @@ const SiteHeader = () => {
                       label: "Log out",
                   },
               ]
-            : [*/
+            : [
         {
             key: "/login",
             icon: <LoginOutlined />,
             label: <Link to="/login">Login</Link>,
         },
-        /*]),*/
+        ]),
     ];
 
     const handleUserMenuClick: MenuProps['onClick'] = ({ key }) => {
         if (key === "logout") {
-            // logout();
+            logout();
             navigate('/');
         } else {
             navigate(key);
