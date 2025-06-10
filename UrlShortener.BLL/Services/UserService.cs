@@ -1,6 +1,5 @@
 ﻿using AutoDependencyRegistration.Attributes;
 using AutoMapper;
-using FlowersShopMyFamilyReactAsp.BLL.DTOs.User.Request;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -8,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UrlShortener.BLL.DTOs.User.Request;
 using UrlShortener.BLL.DTOs.User.Response;
 using UrlShortener.BLL.Exceptions;
 using UrlShortener.BLL.InterfacesServices;

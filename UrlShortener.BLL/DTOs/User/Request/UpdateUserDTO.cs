@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FlowersShopMyFamilyReactAsp.BLL.DTOs.User.Request
+namespace UrlShortener.BLL.DTOs.User.Request
 {
     public class UpdateUserDTO
     {

@@ -1,11 +1,11 @@
-﻿using FlowersShopMyFamilyReactAsp.DAL.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UrlShortener.DAL.Enums;
 
-namespace FlowersShopMyFamilyReactAsp.BLL.DTOs.User.Request
+namespace UrlShortener.BLL.DTOs.User.Request
 {
     public class NewUserDTO
     {

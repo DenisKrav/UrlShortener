@@ -1,4 +1,4 @@
-import { Layout, Form, Input, Button, message, Checkbox } from 'antd';
+import { Layout, Form, Input, Button, Checkbox } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import SiteFooter from '../components/SiteFooter';
 import SiteHeader from '../components/SiteHeader';
@@ -23,12 +23,9 @@ const LogInPage = () => {
         try {
             const token = await loginUser(loginModel);
             login(token, values.remember);
-            login(token, false);
-            message.success("Login successful");
             navigate('/');
         } catch (error: any) {
             console.error(error);
-            message.error(error.message || "Login failed");
         }
     };
 
