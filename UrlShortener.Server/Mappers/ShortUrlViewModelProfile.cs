@@ -17,6 +17,7 @@ namespace UrlShortener.Server.Mappers
             CreateMap<AddShortUrlViewModel, AddShortUrlDTO>();
             CreateMap<ShortUrl, GeneralShortURLViewModel>();
             CreateMap<GeneralShortURLDTO, GeneralShortURLViewModel>();
+            CreateMap<DeleteShortUrlViewModel, DeleteShortUrlDTO>();
         }
     }
 }

@@ -13,6 +13,10 @@ namespace UrlShortener.BLL.InterfacesServices
     {
         Task<IEnumerable<GeneralShortURLDTO>> GetAllAsync();
 
+        Task<string> GetOriginUrlByShortUrl(string shortCode);
+
         Task<ShortUrl> CreateAsync(AddShortUrlDTO shortUrlDTO);
+
+        Task<bool> DeleteAsync(DeleteShortUrlDTO deleteShortUrlDTO);
     }
 }

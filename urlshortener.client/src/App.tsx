@@ -3,6 +3,7 @@ import AppRoutes from "./routes/AppRoutes";
 import theme from '../theme.json';
 import { ConfigProvider } from "antd";
 import { AuthProvider } from "./context/AuthContext";
+import { Toaster } from "sonner";
 
 function App() {
     const queryClient = new QueryClient();
@@ -11,6 +12,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
             <AuthProvider>
                 <ConfigProvider theme={theme}>
+                    <Toaster position="top-right" richColors />
                     <AppRoutes />
                 </ConfigProvider>
             </AuthProvider>

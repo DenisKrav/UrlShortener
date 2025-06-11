@@ -2,6 +2,7 @@ import axios from "axios";
 import type { GeneralResultModel } from "../Models/GeneralResultModel/GeneralResultModel";
 import type { ShortUrlAddModel } from "../Models/ShortUrl/ShortUrlAddModel";
 import type { ShortUrlModel } from "../Models/ShortUrl/ShortUrlModel";
+import type { DeleteShortUrlModel } from "../Models/ShortUrl/DeleteShortUrlModel";
 
 const API_BASE_URL = import.meta.env.VITE_ASPNETCORE_API_URL;
 
@@ -38,3 +39,23 @@ export const addShortUrl = async (urlData: ShortUrlAddModel, token: string): Pro
     return result;
 };
 
+export const deleteShortUrl = async (payload: DeleteShortUrlModel, token: string): Promise<boolean> => {
+    const response = await axios.delete<GeneralResultModel<boolean>>(
+        `${API_BASE_URL}/api/ShortUrls/Delete`,
+        {
+            data: payload,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        }
+    );
+
+    const { result, errors, hasErrors } = response.data;
+
+    if (hasErrors || result !== true) {
+        throw new Error(errors?.join(", ") || "Failed to delete the short URL");
+    }
+
+    return result;
+};

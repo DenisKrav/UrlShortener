@@ -1,10 +1,5 @@
-import { Layout, Table, Typography, Button, Space, Tooltip, Modal, Form, Input } from "antd";
-import {
-    EyeOutlined,
-    EditOutlined,
-    DeleteOutlined,
-    PlusOutlined,
-} from "@ant-design/icons";
+import { Layout, Table, Typography, Button, Space, Tooltip, Modal, Form, Input, Descriptions, Popconfirm } from "antd";
+import { EyeOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import type { ColumnsType } from "antd/es/table";
@@ -14,15 +9,12 @@ import { useMemo, useState } from "react";
 import { useAddShortUrl } from "../api/Queries/ShortUrl/useAddShortUrl";
 import type { ShortUrlAddModel } from "../api/Models/ShortUrl/ShortUrlAddModel";
 import { useGetAllShortUrls } from "../api/Queries/ShortUrl/useGetAllShortUrl";
+import type { ShortUrlModel } from "../api/Models/ShortUrl/ShortUrlModel";
+import { useDeleteShortUrl } from "../api/Queries/ShortUrl/useDeleteShortUrl";
+import { toast } from "sonner";
 
 const { Content } = Layout;
 const { Title } = Typography;
-
-interface ShortUrl {
-    key: string;
-    shortCode: string;
-    originalUrl: string;
-}
 
 const ShortURLsPage = () => {
     const BASE_URL = import.meta.env.VITE_ASPNETCORE_API_URL;
@@ -32,13 +24,18 @@ const ShortURLsPage = () => {
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
     const [form] = Form.useForm();
 
+    const [selectedUrl, setSelectedUrl] = useState<ShortUrlModel | null>(null);
+    const [isViewModalVisible, setIsViewModalVisible] = useState(false);
+
     const { data: fetchedData, isLoading, refetch } = useGetAllShortUrls();
     const { mutate: addShortUrl, isPending } = useAddShortUrl(token ?? "");
+    const { mutate: deleteShortUrlMutation, isPending: isDeleting } = useDeleteShortUrl(token ?? "");
 
     const handleAddUrl = () => {
         form.validateFields().then(values => {
             if (!userId) {
                 console.error("User ID is missing.");
+                toast.error("User ID is missing.");
                 return;
             }
 
@@ -51,17 +48,54 @@ const ShortURLsPage = () => {
                 onSuccess: () => {
                     form.resetFields();
                     setIsAddModalVisible(false);
+                    toast.success("URL added successfully.");
                     refetch();
                 },
                 onError: (error: Error) => {
                     console.error(error.message);
+                    toast.error(error.message);
                 },
             });
         });
     };
 
-    const columns: ColumnsType<ShortUrl> = useMemo(() => {
-        const baseColumns: ColumnsType<ShortUrl> = [
+    const handleDeleteUrl = (record: ShortUrlModel) => {
+        if (!userId) {
+            console.error("User ID is missing.");
+            toast.error("User ID is missing.");
+            return;
+        }
+        if (!isAdminOrManager) {
+            console.error("You do not have permission to delete this URL.");
+            toast.error("You do not have permission to delete this URL.");
+            return;
+        }
+        if (record.createdByUserId !== Number(userId) && userRole !== UserRole.Admin) {
+            console.error("You do not have permission to delete this URL.");
+            toast.error("You do not have permission to delete this URL.");
+            return;
+        }
+
+        deleteShortUrlMutation(
+            {
+                linkId: record.id,
+                userId: Number(userId),
+            },
+            {
+                onSuccess: () => {
+                    toast.success("URL deleted successfully.");
+                    refetch();
+                },
+                onError: (error: Error) => {
+                    console.error("Failed to delete:", error.message);
+                    toast.error(`Failed to delete: ${error.message}`);
+                },
+            }
+        );
+    };
+
+    const columns: ColumnsType<ShortUrlModel> = useMemo(() => {
+        const baseColumns: ColumnsType<ShortUrlModel> = [
             {
                 title: "Original URL",
                 dataIndex: "originalUrl",
@@ -103,22 +137,27 @@ const ShortURLsPage = () => {
                 render: (_, record) => (
                     <Space size="middle">
                         <Tooltip title="View">
-                            <Button shape="circle" icon={<EyeOutlined />} onClick={() => console.log("View", record)} />
-                        </Tooltip>
-                        <Tooltip title="Edit">
-                            <Button shape="circle" icon={<EditOutlined />} onClick={() => console.log("Edit", record)} />
-                        </Tooltip>
-                        <Tooltip title="Delete">
                             <Button
                                 shape="circle"
-                                danger
-                                icon={<DeleteOutlined />}
+                                icon={<EyeOutlined />}
                                 onClick={() => {
-                                    console.log("Delete", record);
-                                    // TODO: реалізувати delete через mutation + refetch()
+                                    setSelectedUrl(record);
+                                    setIsViewModalVisible(true);
                                 }}
                             />
                         </Tooltip>
+                        <Popconfirm
+                            title="Are you sure you want to delete this URL?"
+                            onConfirm={() => handleDeleteUrl(record)}
+                            okText="Yes"
+                            cancelText="No"
+                            okButtonProps={{ loading: isDeleting }}
+                        >
+                            <Tooltip title="Delete">
+                                <Button shape="circle" danger loading={isDeleting} icon={<DeleteOutlined />} />
+                            </Tooltip>
+                        </Popconfirm>
+
                     </Space>
                 ),
             });
@@ -127,11 +166,10 @@ const ShortURLsPage = () => {
         return baseColumns;
     }, [isAdminOrManager]);
 
-    const data: ShortUrl[] =
+    const data: ShortUrlModel[] =
         fetchedData?.map(item => ({
+            ...item,
             key: item.id.toString(),
-            originalUrl: item.originalUrl,
-            shortCode: item.shortCode,
         })) ?? [];
 
     return (
@@ -193,6 +231,47 @@ const ShortURLsPage = () => {
                         <Input placeholder="https://example.com/page" />
                     </Form.Item>
                 </Form>
+            </Modal>
+
+            <Modal
+                title="URL Details"
+                open={isViewModalVisible}
+                onCancel={() => setIsViewModalVisible(false)}
+                footer={[
+                    <Button key="close" onClick={() => setIsViewModalVisible(false)}>
+                        Close
+                    </Button>,
+                ]}
+            >
+                {selectedUrl ? (
+                    <Descriptions column={1} bordered>
+                        <Descriptions.Item label="Original URL">
+                            <Typography.Link href={selectedUrl.originalUrl} target="_blank">
+                                {selectedUrl.originalUrl}
+                            </Typography.Link>
+                        </Descriptions.Item>
+
+                        <Descriptions.Item label="Short Code">
+                            <Typography.Text code>{selectedUrl.shortCode}</Typography.Text>
+                        </Descriptions.Item>
+
+                        <Descriptions.Item label="Shortened URL">
+                            <Typography.Link href={`${BASE_URL}/${selectedUrl.shortCode}`} target="_blank">
+                                {`${BASE_URL}/${selectedUrl.shortCode}`}
+                            </Typography.Link>
+                        </Descriptions.Item>
+
+                        <Descriptions.Item label="Created at">
+                            <Typography.Text code>{selectedUrl.createdAt}</Typography.Text>
+                        </Descriptions.Item>
+
+                        <Descriptions.Item label="Created by User ID">
+                            <Typography.Text code>{selectedUrl.createdByUserId}</Typography.Text>
+                        </Descriptions.Item>
+                    </Descriptions>
+                ) : (
+                    <Typography.Text type="secondary">No data available.</Typography.Text>
+                )}
             </Modal>
         </Layout>
     );

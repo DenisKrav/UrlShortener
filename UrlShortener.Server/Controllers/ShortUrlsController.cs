@@ -72,5 +72,41 @@ namespace UrlShortener.Server.Controllers
                 return result;
             }
         }
+
+        [Authorize]
+        [HttpDelete("Delete")]
+        public async Task<GeneralResultModel> Delete([FromBody] DeleteShortUrlViewModel deleteShortUrlViewModel)
+        {
+            var result = new GeneralResultModel();
+
+            if (deleteShortUrlViewModel.LinkId <= 0)
+            {
+                result.Errors.Add("Invalid link ID.");
+                return result;
+            }
+
+            if (deleteShortUrlViewModel.UserId <= 0)
+            {
+                result.Errors.Add("Invalid user ID.");
+                return result;
+            }
+
+            try
+            {
+                var resOfDel = await _shortUrlService.DeleteAsync(_mapper.Map<DeleteShortUrlDTO>(deleteShortUrlViewModel));
+                result.Result = resOfDel; 
+                return result;
+            }
+            catch (ItemNotFoundException ex)
+            {
+                result.Errors.Add(ex.Message);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Errors.Add("Unexpected error occurred.");
+                return result;
+            }
+        }
     }
 }
