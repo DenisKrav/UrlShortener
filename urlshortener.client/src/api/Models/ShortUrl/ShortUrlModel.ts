@@ -4,4 +4,6 @@ export interface ShortUrlModel {
     shortCode: string;
     createdAt: string;
     createdByUserId: number;
+    createdByUserFirstName: string;
+    createdByUserLastName: string;
 }

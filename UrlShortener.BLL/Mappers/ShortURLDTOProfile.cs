@@ -13,7 +13,9 @@ namespace UrlShortener.BLL.Mappers
     {
         public ShortURLDTOProfile()
         {
-            CreateMap<ShortUrl, GeneralShortURLDTO>();
+            CreateMap<ShortUrl, GeneralShortURLDTO>()
+                .ForMember(dest => dest.CreatedByUserFirstName, opt => opt.MapFrom(src => src.CreatedByUser.FirstName))
+                .ForMember(dest => dest.CreatedByUserLastName, opt => opt.MapFrom(src => src.CreatedByUser.LastName));
         }
     }
 }

@@ -9,5 +9,8 @@ namespace UrlShortener.Server.ViewModels.ShortUrl.Response
         public string ShortCode { get; set; }
         public DateTime CreatedAt { get; set; }
         public long CreatedByUserId { get; set; }
+
+        public string CreatedByUserFirstName { get; set; }
+        public string CreatedByUserLastName { get; set; }
     }
 }

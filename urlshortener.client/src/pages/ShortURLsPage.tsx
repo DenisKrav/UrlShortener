@@ -39,6 +39,19 @@ const ShortURLsPage = () => {
                 return;
             }
 
+            const normalizeUrl = (url: string) =>
+                url.trim().toLowerCase().replace(/\/+$/, "");
+
+            const isDuplicate = fetchedData?.some(
+                url => normalizeUrl(url.originalUrl) === normalizeUrl(values.originalUrl)
+            );
+
+            if (isDuplicate) {
+                toast.error("This URL has already been shortened.");
+                return;
+            }
+
+
             const urlData: ShortUrlAddModel = {
                 originalUrl: values.originalUrl,
                 createdByUserId: Number(userId),
@@ -265,8 +278,8 @@ const ShortURLsPage = () => {
                             <Typography.Text code>{selectedUrl.createdAt}</Typography.Text>
                         </Descriptions.Item>
 
-                        <Descriptions.Item label="Created by User ID">
-                            <Typography.Text code>{selectedUrl.createdByUserId}</Typography.Text>
+                        <Descriptions.Item label="Created by">
+                            <Typography.Text code>{`${selectedUrl.createdByUserFirstName} ${selectedUrl.createdByUserLastName}`}</Typography.Text>
                         </Descriptions.Item>
                     </Descriptions>
                 ) : (

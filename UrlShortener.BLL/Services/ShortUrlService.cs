@@ -37,7 +37,8 @@ namespace UrlShortener.BLL.Services
 
         public async Task<IEnumerable<GeneralShortURLDTO>> GetAllAsync()
         {
-            var urls = await _unitOfWork.ShortUrlRepository.GetAsync();
+            var urls = await _unitOfWork.ShortUrlRepository.GetAsync(null, null, "CreatedByUser");
+
             return _mapper.Map<IEnumerable<GeneralShortURLDTO>>(urls);
         }
 

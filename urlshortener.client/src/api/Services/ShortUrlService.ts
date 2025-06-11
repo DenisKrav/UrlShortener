@@ -9,6 +9,8 @@ const API_BASE_URL = import.meta.env.VITE_ASPNETCORE_API_URL;
 export const getAllShortUrls = async (): Promise<ShortUrlModel[]> => {
     const response = await axios.get<GeneralResultModel<ShortUrlModel[]>>(`${API_BASE_URL}/api/ShortUrls/GetAll`);
 
+    console.log("Response from getAllShortUrls:", response.data);
+
     const { result, errors, hasErrors } = response.data;
 
     if (hasErrors || !result) {
